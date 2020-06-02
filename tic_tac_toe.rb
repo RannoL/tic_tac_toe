@@ -1,4 +1,4 @@
-#Makes,renders and changes the board
+# Makes,renders and changes the board
 class Board
   def initialize
     @walls = ['||', '|', '|', '|| ']
@@ -39,7 +39,7 @@ class Board
   end
 end
 
-#Manages the flow of the game
+# Manages the flow of the game
 class Game
 
   def initialize
@@ -49,20 +49,52 @@ class Game
     puts '1 Player(1)'
     puts '2 Players(2)'
     while true
-      @player_count = gets.chomp
+      @PLAYER_COUNT = gets.chomp
       begin
-        if Integer(@player_count) == 1 || Integer(@player_count) == 1
+        if Integer(@PLAYER_COUNT) == 1 || Integer(@PLAYER_COUNT) == 2
+          start_game(@PLAYER_COUNT)
           break
         else
           puts 'Invalid input. Choose 1 or 2.'
         end
- 
       rescue ArgumentError, TypeError
         puts 'Invalid input. Choose 1 or 2.'
       end
     end
   end
+
+  def start_game(player_count)
+    @board = Board.new
+    player_count == "2" ? two_players_play : one_player_play
+  end
+
+  def two_players_play
+    @player_one = Player.new("Player 1", :X, @board)
+    @player_two = Player.new("Player 2", :O, @board)
+    @player_one.ask_for_coordinate
+  end
+
+  # Play against computer
+  def one_player_play
+    @player_one = Player.new("Player 1", :X, @board)
+  end
 end
   
+class Player
+  attr_accessor :name, :piece
+
+  def initialize(name, piece,board)
+    @name = name
+    @piece = piece
+    @board = board
+    puts "#{@name} is #{@piece}"
+  end
+
+  def ask_for_coordinate
+    puts '---------------------'
+    puts "#{@name}'s move: "
+    @move = gets.chomp
+  end
+end
 
 game = Game.new
