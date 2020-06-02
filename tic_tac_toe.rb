@@ -1,4 +1,4 @@
-# Makes,renders and changes the board
+# Makes,renders,changes and checks the board
 class Board
   attr_accessor :rows
   def initialize
@@ -45,6 +45,43 @@ class Board
         rows["row#{row}".to_sym] = row_content
       end
     end
+  end
+
+  # Remove borders from the rows hash 
+  # return an 2D array of only the specifed buttons and empty strings 
+  def rows_strip(button)
+    stripped_rows = [[][][]]
+    @rows.each_value do |row_str|
+      if row_str.exclude?(button.to_s)
+        next
+      end
+      # "X  "
+      row_str = row_str.delete('| ').gsub(/[^"#{button}"]/, ' ')
+    end
+  end
+  
+  def winning_combination?(button)
+    if winning_diagonal?(button) ||
+       winning_row?(button) ||
+       winning_column?(button)
+      true
+    end
+  end
+
+  def winning_diagonal?(button)
+    WIN = [['X', '', '']
+           ['', 'X', '']
+           ['', '', 'X']]
+    current_board = rows_strip(button)
+
+  end
+  
+   def winning_row?(button)
+    
+  end
+
+   def winning_column?(button)
+    
   end
 end
 
@@ -100,8 +137,17 @@ class Game
       @current_player = @player_one
     end
   end
+
+  def check_game_over
+    check_victory || check_draw
+  end
+
+  def check_victory
+    @board.winning_combination?(@current_player.piece)
+  end
 end
-  
+
+# Manages players and player input
 class Player
   @@made_moves = []
   attr_accessor :name, :piece
@@ -150,4 +196,4 @@ class Player
   end
 end
 
-game = Game.new
+game = Game.new 
