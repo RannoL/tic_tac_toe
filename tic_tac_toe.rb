@@ -96,17 +96,14 @@ class Board
 
   def winning_row?(piece)
     piece = piece.to_s
-    win_combinations = [[[piece, piece, piece],
-                         [' ', ' ', ' '],
-                         [' ', ' ', ' ']],
-                        [[' ', ' ', ' '],
-                         [piece, piece, piece],
-                         [' ', ' ', ' ']],
-                        [[' ', ' ', ' '],
-                         [' ', ' ', ' '],
-                         [piece, piece, piece]]]
     current_board = rows_strip(piece)
-    win_combinations.include?(current_board) ? true : false
+    p current_board
+    current_board.include?([piece, piece, piece]) ? true : false
+  end
+
+  def separate
+    puts ''
+    puts '_____________________'
   end
 end
 
@@ -146,8 +143,7 @@ class Game
     @player_two = Player.new('Player 2', :O, @board)
     @current_player = @player_one
     loop do
-      puts ''
-      puts '_____________________'
+      @board.separate
       @board.render_board
       puts ''
       @current_player.get_coordinate
@@ -159,12 +155,26 @@ class Game
       switch_players
     end
   end
-
+=begin
   # Play against computer
   def one_player_play
     @player_one = Player.new('Player 1', :X, @board)
-  end
+    @computer = Player.new('Computer', :O, @board)
+    @current_player = @player_one
+    loop do
+      @board.separate
+      @board.render_board
+      puts ''
+      @current_player.get_coordinate
 
+      if check_game_over
+        break
+      end
+
+      switch_players
+    end
+  end
+=end
   def switch_players
     if @current_player == @player_one
       @current_player = @player_two
@@ -179,8 +189,7 @@ class Game
 
   def check_victory
     if @board.winning_combination?(@current_player.piece)
-      puts ''
-      puts '_____________________'
+      @board.separate
       @board.render_board
       puts ''
       puts "#{@current_player.name} wins!"
@@ -206,7 +215,7 @@ class Player
   @@made_moves = []
   attr_accessor :name, :piece
 
-  def initialize(name, piece,board)
+  def initialize(name, piece, board)
     @name = name
     @piece = piece
     @board = board
@@ -250,4 +259,4 @@ class Player
   end
 end
 
-game = Game.new 
+Game.new
