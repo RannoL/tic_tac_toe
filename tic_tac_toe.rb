@@ -5,13 +5,9 @@ class Board
     @walls = ['||', '|', '|', '|| ']
     @cell_index = 1
     @row_value = ''
-    @rows = { header:"_____________________",
-              row1:"",
-              row2:"",
-              row3:"",
-              footer:"---------------------" }
-    make_board
-    render_board
+    @rows = { row1:'',
+              row2:'',
+              row3:'' }
   end
 
   def make_board
@@ -47,41 +43,70 @@ class Board
     end
   end
 
-  # Remove borders from the rows hash 
-  # return an 2D array of only the specifed buttons and empty strings 
-  def rows_strip(button)
-    stripped_rows = [[][][]]
+  # Remove borders from the rows hash.
+  # Return an 2D array of only the specifed pieces and empty strings.
+  def rows_strip(piece)
+    # Will be a 2D Array of the rows content. Can be compared to WIN combination.
+    stripped_rows = []
+    i = 0
     @rows.each_value do |row_str|
-      if row_str.exclude?(button.to_s)
-        next
-      end
-      # "X  "
-      row_str = row_str.delete('| ').gsub(/[^"#{button}"]/, ' ')
+      # Delete borders and replace everything but the piece with space.
+      row_str = row_str.delete('| ').gsub(/[^"#{piece}"]/, ' ')
+      row_arr = row_str.split('')
+      stripped_rows[i] = row_arr
+      i += 1
     end
+    stripped_rows
   end
-  
-  def winning_combination?(button)
-    if winning_diagonal?(button) ||
-       winning_row?(button) ||
-       winning_column?(button)
+
+  def winning_combination?(piece)
+    if winning_diagonal?(piece) ||
+       winning_row?(piece) ||
+       winning_column?(piece)
       true
     end
   end
 
-  def winning_diagonal?(button)
-    WIN = [['X', '', '']
-           ['', 'X', '']
-           ['', '', 'X']]
-    current_board = rows_strip(button)
-
+  def winning_diagonal?(piece)
+    piece = piece.to_s
+    win1 = [[piece, ' ', ' '],
+            [' ', piece, ' '],
+            [' ', ' ', piece]]
+    win2 = [[' ', ' ', piece],
+            [' ', piece, ' '],
+            [piece, ' ', ' ']]
+    current_board = rows_strip(piece)
+    current_board == win1 || current_board == win2 ? true : false
   end
-  
-   def winning_row?(button)
-    
+
+  def winning_column?(piece)
+    piece = piece.to_s
+    win_combinations = [[[piece, ' ', ' '],
+                         [piece, ' ', ' '],
+                         [piece, ' ', ' ']],
+                        [[' ', piece, ' '],
+                         [' ', piece, ' '],
+                         [' ', piece, ' ']],
+                        [[' ', ' ', piece],
+                         [' ', ' ', piece],
+                         [' ', ' ', piece]]]
+    current_board = rows_strip(piece)
+    win_combinations.include?(current_board) ? true : false
   end
 
-   def winning_column?(button)
-    
+  def winning_row?(piece)
+    piece = piece.to_s
+    win_combinations = [[[piece, piece, piece],
+                         [' ', ' ', ' '],
+                         [' ', ' ', ' ']],
+                        [[' ', ' ', ' '],
+                         [piece, piece, piece],
+                         [' ', ' ', ' ']],
+                        [[' ', ' ', ' '],
+                         [' ', ' ', ' '],
+                         [piece, piece, piece]]]
+    current_board = rows_strip(piece)
+    win_combinations.include?(current_board) ? true : false
   end
 end
 
@@ -111,7 +136,9 @@ class Game
 
   def start_game(player_count)
     @board = Board.new
-    player_count == "2" ? two_players_play : one_player_play
+    puts '_____________________'
+    @board.make_board
+    player_count == '2' ? two_players_play : one_player_play
   end
 
   def two_players_play
@@ -119,8 +146,15 @@ class Game
     @player_two = Player.new('Player 2', :O, @board)
     @current_player = @player_one
     loop do
+      puts ''
+      puts '_____________________'
       @board.render_board
+      puts ''
       @current_player.get_coordinate
+      if check_game_over
+        break
+      end
+
       switch_players
     end
   end
@@ -139,12 +173,25 @@ class Game
   end
 
   def check_game_over
-    check_victory || check_draw
+    check_victory # || check_draw
+
   end
 
   def check_victory
-    @board.winning_combination?(@current_player.piece)
+    if @board.winning_combination?(@current_player.piece)
+      puts ''
+      puts '_____________________'
+      @board.render_board
+      puts ''
+      puts "#{@current_player.name} wins!"
+      true
+    else
+      false
+    end
   end
+
+  #def check_draw
+  #end
 end
 
 # Manages players and player input
@@ -156,6 +203,7 @@ class Player
     @name = name
     @piece = piece
     @board = board
+    puts ''
     puts "#{@name} is #{@piece}"
   end
 
