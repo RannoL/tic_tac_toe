@@ -11,7 +11,7 @@ class Board
   end
 
   def make_board
-    for row in 1...4
+    for row in 1..3
       @walls.each do |wall|
         @row_value += wall
         if wall == @walls.last
@@ -33,10 +33,10 @@ class Board
   end
 
   def find_n_replace_coord(coord,piece)
-
-    for row in 1...4
+    for row in 1..3
       if rows["row#{row}".to_sym].include?(coord)
         row_content = rows["row#{row}".to_sym]
+        #change the coordinate to players piece
         row_content[coord] = piece.to_s
         rows["row#{row}".to_sym] = row_content
       end
@@ -151,6 +151,7 @@ class Game
       @board.render_board
       puts ''
       @current_player.get_coordinate
+
       if check_game_over
         break
       end
@@ -173,8 +174,7 @@ class Game
   end
 
   def check_game_over
-    check_victory # || check_draw
-
+    check_victory  || check_draw
   end
 
   def check_victory
@@ -184,14 +184,21 @@ class Game
       @board.render_board
       puts ''
       puts "#{@current_player.name} wins!"
+      puts ''
       true
     else
       false
     end
   end
 
-  #def check_draw
-  #end
+  def check_draw
+    if Player.class_variable_get(:@@made_moves).length >= 9
+      puts ''
+      puts "It's a draw."
+      puts ''
+      true
+    end
+  end
 end
 
 # Manages players and player input
@@ -211,7 +218,7 @@ class Player
   def ask_for_coordinate
     puts '---------------------'
     puts "#{@name}'s move: "
-    @move = gets.chomp
+    gets.chomp
   end
 
   # Verify and add to the board
@@ -234,7 +241,6 @@ class Player
         puts 'Already occupied!'
       elsif coord.between?(1, 9)
         true
-        @@made_moves << coord
       else
         puts 'Choose a coordinate from the board between 1 and 9'
       end
