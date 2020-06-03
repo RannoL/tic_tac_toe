@@ -94,7 +94,6 @@ class Board
          current_board[1][piece] &&
          current_board[1][piece] ==
          current_board[2][piece]
-        puts "winning column!"
         return true
       else
         false
