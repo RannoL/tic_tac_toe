@@ -26,13 +26,16 @@ class Board
   end
 
   def render_board
+    puts
+    puts '_____________________'
     @rows.each_value do |row|
       puts row
       puts '---------------------'
     end
+    puts
   end
 
-  def find_n_replace_coord(coord,piece)
+  def find_n_replace_coord(coord, piece)
     for row in 1..3
       if rows["row#{row}".to_sym].include?(coord)
         row_content = rows["row#{row}".to_sym]
@@ -81,30 +84,32 @@ class Board
 
   def winning_column?(piece)
     piece = piece.to_s
-    win_combinations = [[[piece, ' ', ' '],
-                         [piece, ' ', ' '],
-                         [piece, ' ', ' ']],
-                        [[' ', piece, ' '],
-                         [' ', piece, ' '],
-                         [' ', piece, ' ']],
-                        [[' ', ' ', piece],
-                         [' ', ' ', piece],
-                         [' ', ' ', piece]]]
     current_board = rows_strip(piece)
-    win_combinations.include?(current_board) ? true : false
+    for piece in 0...3
+      next if current_board[0][piece] == ' '
+
+      # If there is a matching piece on the same index in every row
+      # it forms a winning column
+      if current_board[0][piece] ==
+         current_board[1][piece] &&
+         current_board[1][piece] ==
+         current_board[2][piece]
+        puts "winning column!"
+        return true
+      else
+        false
+      end
+    end
+    # Otherwise returns 3, from for loop which equals true in winning_combination
+    false
   end
 
   def winning_row?(piece)
     piece = piece.to_s
     current_board = rows_strip(piece)
-    p current_board
     current_board.include?([piece, piece, piece]) ? true : false
   end
 
-  def separate
-    puts ''
-    puts '_____________________'
-  end
 end
 
 # Manages the flow of the game
@@ -143,9 +148,7 @@ class Game
     @player_two = Player.new('Player 2', :O, @board)
     @current_player = @player_one
     loop do
-      @board.separate
       @board.render_board
-      puts ''
       @current_player.get_coordinate
 
       if check_game_over
@@ -155,16 +158,14 @@ class Game
       switch_players
     end
   end
-=begin
-  # Play against computer
+
+=begin   # Play against computer
   def one_player_play
     @player_one = Player.new('Player 1', :X, @board)
-    @computer = Player.new('Computer', :O, @board)
+    @player_two = Player.new('Computer', :O, @board)
     @current_player = @player_one
     loop do
-      @board.separate
       @board.render_board
-      puts ''
       @current_player.get_coordinate
 
       if check_game_over
@@ -173,8 +174,9 @@ class Game
 
       switch_players
     end
-  end
+  end 
 =end
+
   def switch_players
     if @current_player == @player_one
       @current_player = @player_two
@@ -189,9 +191,7 @@ class Game
 
   def check_victory
     if @board.winning_combination?(@current_player.piece)
-      @board.separate
       @board.render_board
-      puts ''
       puts "#{@current_player.name} wins!"
       puts ''
       true
@@ -202,9 +202,9 @@ class Game
 
   def check_draw
     if Player.class_variable_get(:@@made_moves).length >= 9
-      puts ''
+      puts
       puts "It's a draw."
-      puts ''
+      puts
       true
     end
   end
@@ -219,7 +219,7 @@ class Player
     @name = name
     @piece = piece
     @board = board
-    puts ''
+    puts
     puts "#{@name} is #{@piece}"
   end
 
