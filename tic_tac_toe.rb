@@ -10,6 +10,14 @@ class Board
               row3:'' }
   end
 
+  def winning_combination?(piece)
+    if winning_diagonal?(piece) ||
+       winning_row?(piece) ||
+       winning_column?(piece)
+      true
+    end
+  end
+
   def make_board
     for row in 1..3
       @walls.each do |wall|
@@ -46,69 +54,62 @@ class Board
     end
   end
 
-  # Remove borders from the rows hash.
-  # Return an 2D array of only the specifed pieces and empty strings.
-  def rows_strip(piece)
-    # Will be a 2D Array of the rows content. Can be compared to WIN combination.
-    stripped_rows = []
-    i = 0
-    @rows.each_value do |row_str|
-      # Delete borders and replace everything but the piece with space.
-      row_str = row_str.delete('| ').gsub(/[^"#{piece}"]/, ' ')
-      row_arr = row_str.split('')
-      stripped_rows[i] = row_arr
-      i += 1
-    end
-    stripped_rows
-  end
+  private
 
-  def winning_combination?(piece)
-    if winning_diagonal?(piece) ||
-       winning_row?(piece) ||
-       winning_column?(piece)
-      true
-    end
-  end
-
-  def winning_diagonal?(piece)
-    piece = piece.to_s
-    win1 = [[piece, ' ', ' '],
-            [' ', piece, ' '],
-            [' ', ' ', piece]]
-    win2 = [[' ', ' ', piece],
-            [' ', piece, ' '],
-            [piece, ' ', ' ']]
-    current_board = rows_strip(piece)
-    current_board == win1 || current_board == win2 ? true : false
-  end
-
-  def winning_column?(piece)
-    piece = piece.to_s
-    current_board = rows_strip(piece)
-    for piece in 0...3
-      next if current_board[0][piece] == ' '
-
-      # If there is a matching piece on the same index in every row
-      # it forms a winning column
-      if current_board[0][piece] ==
-         current_board[1][piece] &&
-         current_board[1][piece] ==
-         current_board[2][piece]
-        return true
-      else
-        false
+    # Remove borders from the rows hash.
+    # Return an 2D array of only the specifed pieces and empty strings.
+    def rows_strip(piece)
+      # Will be a 2D Array of the rows content. Can be compared to WIN combination.
+      stripped_rows = []
+      i = 0
+      @rows.each_value do |row_str|
+        # Delete borders and replace everything but the piece with space.
+        row_str = row_str.delete('| ').gsub(/[^"#{piece}"]/, ' ')
+        row_arr = row_str.split('')
+        stripped_rows[i] = row_arr
+        i += 1
       end
+      stripped_rows
     end
-    # Otherwise returns 3, from for loop which equals true in winning_combination
-    false
-  end
 
-  def winning_row?(piece)
-    piece = piece.to_s
-    current_board = rows_strip(piece)
-    current_board.include?([piece, piece, piece]) ? true : false
-  end
+    def winning_diagonal?(piece)
+      piece = piece.to_s
+      win1 = [[piece, ' ', ' '],
+              [' ', piece, ' '],
+              [' ', ' ', piece]]
+      win2 = [[' ', ' ', piece],
+              [' ', piece, ' '],
+              [piece, ' ', ' ']]
+      current_board = rows_strip(piece)
+      current_board == win1 || current_board == win2 ? true : false
+    end
 
+    def winning_column?(piece)
+      piece = piece.to_s
+      current_board = rows_strip(piece)
+      for piece in 0...3
+        next if current_board[0][piece] == ' '
+
+        # If there is a matching piece on the same index in every row
+        # it forms a winning column
+        if current_board[0][piece] ==
+          current_board[1][piece] &&
+          current_board[1][piece] ==
+          current_board[2][piece]
+          return true
+        else
+          false
+        end
+      end
+      # Otherwise returns 3, from for loop which equals true in winning_combination
+      false
+    end
+
+    def winning_row?(piece)
+      piece = piece.to_s
+      current_board = rows_strip(piece)
+      current_board.include?([piece, piece, piece]) ? true : false
+    end
 end
 
 # Manages the flow of the game
@@ -124,60 +125,62 @@ class Game
     start_game
   end
 
-  def start_game
-    @board = Board.new
-    puts '_____________________'
-    @board.make_board
-    two_players_play
-  end
 
-  def two_players_play
-    @player_one = Player.new('Player 1', :X, @board)
-    @player_two = Player.new('Player 2', :O, @board)
-    @current_player = @player_one
-    loop do
-      @board.render_board
-      @current_player.get_coordinate
-
-      if check_game_over
-        break
-      end
-
-      switch_players
+  private
+    def start_game
+      @board = Board.new
+      puts '_____________________'
+      @board.make_board
+      two_players_play
     end
-  end
 
-  def switch_players
-    if @current_player == @player_one
-      @current_player = @player_two
-    else
+    def two_players_play
+      @player_one = Player.new('Player 1', :X, @board)
+      @player_two = Player.new('Player 2', :O, @board)
       @current_player = @player_one
-    end
-  end
+      loop do
+        @board.render_board
+        @current_player.get_coordinate
 
-  def check_game_over
-    check_victory || check_draw
-  end
+        if check_game_over
+          break
+        end
 
-  def check_victory
-    if @board.winning_combination?(@current_player.piece)
-      @board.render_board
-      puts "#{@current_player.name} wins!"
-      puts ''
-      true
-    else
-      false
+        switch_players
+      end
     end
-  end
 
-  def check_draw
-    if Player.class_variable_get(:@@made_moves).length >= 9
-      puts
-      puts "It's a draw."
-      puts
-      true
+    def switch_players
+      if @current_player == @player_one
+        @current_player = @player_two
+      else
+        @current_player = @player_one
+      end
     end
-  end
+
+    def check_game_over
+      check_victory || check_draw
+    end
+
+    def check_victory
+      if @board.winning_combination?(@current_player.piece)
+        @board.render_board
+        puts "#{@current_player.name} wins!"
+        puts ''
+        true
+      else
+        false
+      end
+    end
+
+    def check_draw
+      if Player.class_variable_get(:@@made_moves).length >= 9
+        puts
+        puts "It's a draw."
+        puts
+        true
+      end
+    end
 end
 
 # Manages players and player input
@@ -193,14 +196,7 @@ class Player
     puts "#{@name} is #{@piece}"
   end
 
-  # Ask for users input
-  def ask_for_coordinate
-    puts '---------------------'
-    puts "#{@name}'s move: "
-    gets.chomp
-  end
-
-  # Verify and add to the board
+    # Verify and add to the board
   def get_coordinate
     loop do
       coord = ask_for_coordinate
@@ -212,21 +208,29 @@ class Player
     end
   end
 
-  def verify_coord(coord)
-    begin
-      coord = Integer(coord)
+  private
+    # Ask for users input
+    def ask_for_coordinate
+      puts '---------------------'
+      puts "#{@name}'s move: "
+      gets.chomp
+    end
 
-      if @@made_moves.include?(coord)
-        puts 'Already occupied!'
-      elsif coord.between?(1, 9)
-        true
-      else
+    def verify_coord(coord)
+      begin
+        coord = Integer(coord)
+
+        if @@made_moves.include?(coord)
+          puts 'Already occupied!'
+        elsif coord.between?(1, 9)
+          true
+        else
+          puts 'Choose a coordinate from the board between 1 and 9'
+        end
+      rescue ArgumentError, TypeError
         puts 'Choose a coordinate from the board between 1 and 9'
       end
-    rescue ArgumentError, TypeError
-      puts 'Choose a coordinate from the board between 1 and 9'
     end
-  end
 end
 
 Game.new
