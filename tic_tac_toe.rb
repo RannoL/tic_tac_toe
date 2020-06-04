@@ -74,14 +74,24 @@ class Board
 
     def winning_diagonal?(piece)
       piece = piece.to_s
-      win1 = [[piece, ' ', ' '],
-              [' ', piece, ' '],
-              [' ', ' ', piece]]
-      win2 = [[' ', ' ', piece],
-              [' ', piece, ' '],
-              [piece, ' ', ' ']]
       current_board = rows_strip(piece)
-      current_board == win1 || current_board == win2 ? true : false
+      if current_board[1][1] == ' '
+        false
+      elsif current_board[0][0] ==
+            current_board[1][1] &&
+            current_board[1][1] ==
+            current_board[2][2]
+        puts "winning diagonal1"
+        true
+      elsif current_board[0][2] ==
+            current_board[1][1] &&
+            current_board[1][1] ==
+            current_board[2][0]
+        puts 'winning diagonal2'
+        true
+      else
+        false
+      end
     end
 
     def winning_column?(piece)
@@ -125,8 +135,8 @@ class Game
     start_game
   end
 
-
   private
+
     def start_game
       @board = Board.new
       puts '_____________________'
@@ -209,6 +219,7 @@ class Player
   end
 
   private
+  
     # Ask for users input
     def ask_for_coordinate
       puts '---------------------'
