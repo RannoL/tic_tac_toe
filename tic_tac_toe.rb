@@ -115,31 +115,20 @@ end
 class Game
 
   def initialize
+    require 'io/console' 
     @banner = File.read("banner.txt")
     puts @banner
-    puts 'Choose gamemode:'
-    puts '1 Player(1)'
-    puts '2 Players(2)'
-    while true
-      @PLAYER_COUNT = gets.chomp
-      begin
-        if Integer(@PLAYER_COUNT) == 1 || Integer(@PLAYER_COUNT) == 2
-          start_game(@PLAYER_COUNT)
-          break
-        else
-          puts 'Invalid input. Choose 1 or 2.'
-        end
-      rescue ArgumentError, TypeError
-        puts 'Invalid input. Choose 1 or 2.'
-      end
-    end
+    puts 'Press any key to continue'
+    STDIN.getch
+    puts
+    start_game
   end
 
-  def start_game(player_count)
+  def start_game
     @board = Board.new
     puts '_____________________'
     @board.make_board
-    player_count == '2' ? two_players_play : one_player_play
+    two_players_play
   end
 
   def two_players_play
@@ -158,24 +147,6 @@ class Game
     end
   end
 
-=begin   # Play against computer
-  def one_player_play
-    @player_one = Player.new('Player 1', :X, @board)
-    @player_two = Player.new('Computer', :O, @board)
-    @current_player = @player_one
-    loop do
-      @board.render_board
-      @current_player.get_coordinate
-
-      if check_game_over
-        break
-      end
-
-      switch_players
-    end
-  end 
-=end
-
   def switch_players
     if @current_player == @player_one
       @current_player = @player_two
@@ -185,7 +156,7 @@ class Game
   end
 
   def check_game_over
-    check_victory  || check_draw
+    check_victory || check_draw
   end
 
   def check_victory
